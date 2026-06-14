@@ -2,7 +2,7 @@ import os
 import re
 import json  # Necesario para procesar la estructura interactiva de WhatsApp
 from flask import Flask, request
-from twilio.twiml.messaging_response import MessagingResponse
+from twilio.twiml.messaging_response import MessagingResponse, Parameter
 
 app = Flask(__name__)
 
@@ -95,8 +95,8 @@ def webhook():
                     "action": {"name": "catalog_message"}
                 }
             }
-            # Sintaxis universal compatible con el árbol TwiML de Twilio
-            msg.add_child('Parameter', name='wrapped_body', value=f"whatsapp:{json.dumps(payload_catalogo)}")
+            # Forma estándar y limpia usando el objeto nativo Parameter de Twilio
+            msg.append(Parameter(name='wrapped_body', value=f"whatsapp:{json.dumps(payload_catalogo)}"))
             return str(resp)
 
         # 2. FLUJO DE DETALLE (Productos del Catálogo)
@@ -115,7 +115,7 @@ def webhook():
                         }
                     }
                 }
-                msg.add_child('Parameter', name='wrapped_body', value=f"whatsapp:{json.dumps(payload_producto)}")
+                msg.append(Parameter(name='wrapped_body', value=f"whatsapp:{json.dumps(payload_producto)}"))
                 return str(resp)
             else:
                 resp.message("¡Con gusto te ayudo! 😊 ¿De qué accesorio te gustaría ver la foto o el precio? Recuerda que también puedes ver la tienda completa aquí: https://wa.me/c/176231148474470")
@@ -126,14 +126,10 @@ def webhook():
             resp.message("¡Excelente elección! 🛍️ El artículo se añadirá a tu carrito. ¿Prefieres realizar el pago por transferencia bancaria o te genero un link de pago rápido?")
             return str(resp)
 
-        # Fallback por defecto (Si no entiende la intención, envía texto plano estable)
+        # Fallback seguro por defecto si no entiende nada
         resp.message("¡Hola! ✨ Te invito a revisar nuestras piezas hechas a mano directamente en nuestro catálogo de WhatsApp aquí: https://wa.me/c/176231148474470 👇")
         return str(resp)
 
     except Exception as e:
         print(f"❌ ERROR EN WEBHOOK: {str(e)}")
         return f"Error: {str(e)}", 500
-
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)

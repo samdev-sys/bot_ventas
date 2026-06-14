@@ -77,60 +77,63 @@ def home():
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    incoming_msg = request.form.get("Body", "").strip()
-    intencion = detectar_intencion(incoming_msg)
-
-    resp = MessagingResponse()
-
-    # 1. FLUJO DE BIENVENIDA O CONSULTA GENERAL (Botón nativo "Ver catálogo")
-    if intencion == "saludo":
-        msg = resp.message("¡Hola! ✨ Bienvenida a nuestra tienda de accesorios. 💖 Te invito a explorar todas nuestras piezas exclusivas directamente en nuestro catálogo:")
-
-        payload_catalogo = {
-            "type": "interactive",
-            "interactive": {
-                "type": "catalog_message",
-                "action": {
-                    "name": "catalog_message"
-                }
-            }
-        }
-        msg.persistent_action(f"whatsapp:{json.dumps(payload_catalogo)}")
-        return str(resp)
-
-    # 2. FLUJO DE DETALLE (Muestra el producto interactivo específico)
-    if intencion in ["precio", "foto", "consulta"]:
-        product_retailer_id = obtener_id_producto_real(incoming_msg)
+    try:
+        incoming_msg = request.form.get("Body", "").strip()
+        intencion = detectar_intencion(incoming_msg)
         
-        if product_retailer_id:
-            msg = resp.message("¡Por supuesto! Aquí tienes la información y la imagen directamente de nuestro catálogo de WhatsApp: ✨")
-            
-            payload_producto = {
+        print(f"--- MSG: {incoming_msg} | INTENCION: {intencion} ---")
+        
+        resp = MessagingResponse()
+        
+        # 1. FLUJO DE BIENVENIDA O CONSULTA GENERAL
+        if intencion == "saludo":
+            msg = resp.message("¡Hola! ✨ Bienvenida a nuestra tienda de accesorios. 💖 Te invito a explorar todas nuestras piezas exclusivas directamente en nuestro catálogo:")
+            payload_catalogo = {
                 "type": "interactive",
                 "interactive": {
-                    "type": "product",
-                    "action": {
-                        "catalog_id": ID_CATALOGO_REAL,
-                        "product_retailer_id": product_retailer_id
-                    }
+                    "type": "catalog_message",
+                    "action": {"name": "catalog_message"}
                 }
             }
-            msg.persistent_action(f"whatsapp:{json.dumps(payload_producto)}")
-            return str(resp)
-        else:
-            resp.message("¡Con gusto te ayudo! 😊 ¿De qué accesorio te gustaría ver la foto o el precio? Recuerda que también puedes ver la tienda completa aquí: https://wa.me/c/176231148474470")
+            # Sintaxis universal compatible con el árbol TwiML de Twilio
+            msg.add_child('Parameter', name='wrapped_body', value=f"whatsapp:{json.dumps(payload_catalogo)}")
             return str(resp)
 
-    # 3. FLUJO DE COMPRA
-    if intencion == "compra":
-        resp.message("¡Excelente elección! 🛍️ El artículo se añadirá a tu carrito. ¿Prefieres realizar el pago por transferencia bancaria o te genero un link de pago rápido?")
+        # 2. FLUJO DE DETALLE (Productos del Catálogo)
+        if intencion in ["precio", "foto", "consulta"]:
+            product_retailer_id = obtener_id_producto_real(incoming_msg)
+            
+            if product_retailer_id:
+                msg = resp.message("¡Por supuesto! Aquí tienes la información y la imagen directamente de nuestro catálogo de WhatsApp: ✨")
+                payload_producto = {
+                    "type": "interactive",
+                    "interactive": {
+                        "type": "product",
+                        "action": {
+                            "catalog_id": ID_CATALOGO_REAL,
+                            "product_retailer_id": product_retailer_id
+                        }
+                    }
+                }
+                msg.add_child('Parameter', name='wrapped_body', value=f"whatsapp:{json.dumps(payload_producto)}")
+                return str(resp)
+            else:
+                resp.message("¡Con gusto te ayudo! 😊 ¿De qué accesorio te gustaría ver la foto o el precio? Recuerda que también puedes ver la tienda completa aquí: https://wa.me/c/176231148474470")
+                return str(resp)
+
+        # 3. FLUJO DE COMPRA
+        if intencion == "compra":
+            resp.message("¡Excelente elección! 🛍️ El artículo se añadirá a tu carrito. ¿Prefieres realizar el pago por transferencia bancaria o te genero un link de pago rápido?")
+            return str(resp)
+
+        # Fallback por defecto (Si no entiende la intención, envía texto plano estable)
+        resp.message("¡Hola! ✨ Te invito a revisar nuestras piezas hechas a mano directamente en nuestro catálogo de WhatsApp aquí: https://wa.me/c/176231148474470 👇")
         return str(resp)
 
-    # Respuesta por defecto
-    resp.message("¡Hola! ✨ Te invito a revisar nuestras piezas hechas a mano directamente en el catálogo de WhatsApp aquí abajo. 👇")
-    return str(resp)
+    except Exception as e:
+        print(f"❌ ERROR EN WEBHOOK: {str(e)}")
+        return f"Error: {str(e)}", 500
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    # Para producción en Railway, quitamos el debug manual para optimizar recursos
     app.run(host="0.0.0.0", port=port, debug=False)

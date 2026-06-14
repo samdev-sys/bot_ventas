@@ -71,17 +71,21 @@ def obtener_id_producto_real(texto):
         
     return None
 
+@app.route("/", methods=["GET"])
+def home():
+    return "Bot de WhatsApp Activo y en Línea ✅", 200
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    incoming_msg = request.values.get("Body", "").strip()
+    incoming_msg = request.form.get("Body", "").strip()
     intencion = detectar_intencion(incoming_msg)
-    
+
     resp = MessagingResponse()
-    
+
     # 1. FLUJO DE BIENVENIDA O CONSULTA GENERAL (Botón nativo "Ver catálogo")
     if intencion == "saludo":
         msg = resp.message("¡Hola! ✨ Bienvenida a nuestra tienda de accesorios. 💖 Te invito a explorar todas nuestras piezas exclusivas directamente en nuestro catálogo:")
-        
+
         payload_catalogo = {
             "type": "interactive",
             "interactive": {
@@ -91,7 +95,7 @@ def webhook():
                 }
             }
         }
-        msg.persistent_action(f"whatsapp:{json.dumps(payload_fallback)}")
+        msg.persistent_action(f"whatsapp:{json.dumps(payload_catalogo)}")
         return str(resp)
 
     # 2. FLUJO DE DETALLE (Muestra el producto interactivo específico)

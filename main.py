@@ -2,7 +2,7 @@ import os
 import re
 import json  # Necesario para procesar la estructura interactiva de WhatsApp
 from flask import Flask, request
-from twilio.twiml.messaging_response import MessagingResponse, Parameter
+from twilio.twiml.messaging_response import MessagingResponse
 
 app = Flask(__name__)
 
@@ -95,8 +95,8 @@ def webhook():
                     "action": {"name": "catalog_message"}
                 }
             }
-            # Forma estándar y limpia usando el objeto nativo Parameter de Twilio
-            msg.append(Parameter(name='wrapped_body', value=f"whatsapp:{json.dumps(payload_catalogo)}"))
+            # Agregamos el parámetro XML usando la estructura básica de diccionarios de la librería
+            msg.append({"name": "Parameter", "attributes": {"name": "wrapped_body", "value": f"whatsapp:{json.dumps(payload_catalogo)}"}})
             return str(resp)
 
         # 2. FLUJO DE DETALLE (Productos del Catálogo)
@@ -115,7 +115,7 @@ def webhook():
                         }
                     }
                 }
-                msg.append(Parameter(name='wrapped_body', value=f"whatsapp:{json.dumps(payload_producto)}"))
+                msg.append({"name": "Parameter", "attributes": {"name": "wrapped_body", "value": f"whatsapp:{json.dumps(payload_producto)}"}})
                 return str(resp)
             else:
                 resp.message("¡Con gusto te ayudo! 😊 ¿De qué accesorio te gustaría ver la foto o el precio? Recuerda que también puedes ver la tienda completa aquí: https://wa.me/c/176231148474470")
@@ -126,10 +126,14 @@ def webhook():
             resp.message("¡Excelente elección! 🛍️ El artículo se añadirá a tu carrito. ¿Prefieres realizar el pago por transferencia bancaria o te genero un link de pago rápido?")
             return str(resp)
 
-        # Fallback seguro por defecto si no entiende nada
+        # Fallback seguro por defecto si no entiende nada (Evita que el bot se quede mudo)
         resp.message("¡Hola! ✨ Te invito a revisar nuestras piezas hechas a mano directamente en nuestro catálogo de WhatsApp aquí: https://wa.me/c/176231148474470 👇")
         return str(resp)
 
     except Exception as e:
         print(f"❌ ERROR EN WEBHOOK: {str(e)}")
         return f"Error: {str(e)}", 500
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)

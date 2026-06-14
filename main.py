@@ -91,7 +91,7 @@ def webhook():
                 }
             }
         }
-        msg.persistent_action(f"whatsapp:{json.dumps(payload_catalogo)}")
+        msg.persistent_action(f"whatsapp:{json.dumps(payload_fallback)}")
         return str(resp)
 
     # 2. FLUJO DE DETALLE (Muestra el producto interactivo específico)

@@ -1,5 +1,6 @@
 import os
-from flask import Flask, request, jsonify
+import time
+from flask import Flask, request, Response
 from twilio.twiml.messaging_response import MessagingResponse
 from groq import Groq
 
@@ -89,6 +90,7 @@ REGLAS DE INTERACCIÓN:
 def webhook():
     incoming_msg = request.values.get("Body", "").strip()
     from_number = request.values.get("From", "unknown")
+    start = time.time()
     print(f"[WEBHOOK] Mensaje de {from_number}: {incoming_msg}")
 
     resp = MessagingResponse()
@@ -111,7 +113,11 @@ def webhook():
         print(f"[WEBHOOK] Error en Groq: {e}")
         msg.body("¡Hola! ✨ Estamos presentando alta demanda, pero puedes ver fotos y precios de todo nuestro inventario en el catálogo oficial: https://wa.me/c/573103632461 🥰")
 
-    return str(resp)
+    elapsed = round(time.time() - start, 2)
+    print(f"[WEBHOOK] Respondido en {elapsed}s")
+    twiml_str = str(resp)
+    print(f"[WEBHOOK] TwiML: {twiml_str[:200]}")
+    return Response(twiml_str, mimetype="text/xml")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

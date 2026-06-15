@@ -88,6 +88,9 @@ REGLAS DE INTERACCIÓN:
 @app.route("/webhook", methods=["POST"])
 def webhook():
     incoming_msg = request.values.get("Body", "").strip()
+    from_number = request.values.get("From", "unknown")
+    print(f"[WEBHOOK] Mensaje de {from_number}: {incoming_msg}")
+
     resp = MessagingResponse()
     msg = resp.message()
 
@@ -102,9 +105,10 @@ def webhook():
         )
         reply_text = chat_completion.choices[0].message.content
         msg.body(reply_text)
+        print(f"[WEBHOOK] Respuesta enviada: {reply_text[:80]}...")
 
     except Exception as e:
-        print(f"Error en Groq: {e}")
+        print(f"[WEBHOOK] Error en Groq: {e}")
         msg.body("¡Hola! ✨ Estamos presentando alta demanda, pero puedes ver fotos y precios de todo nuestro inventario en el catálogo oficial: https://wa.me/c/573103632461 🥰")
 
     return str(resp)

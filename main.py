@@ -6,7 +6,7 @@ from flask import Flask, request
 app = Flask(__name__)
 
 # ⚠️ REEMPLAZA ESTE LINK CON EL LINK REAL DE TU WHATSAPP BUSINESS DE COLOMBIA (Ej: https://wa.me/c/573XXXXXXXXX)
-LINK_CATALOGO = "https://wa.me/c/176231148474470"
+LINK_CATALOGO = "https://wa.me/c/573103632461"
 
 SALUDOS = ["hola", "buenas", "buen día", "buenas tardes", "buenos días", "qué tal", "hey", "info", "información"]
 PRECIO_KEYWORDS = ["precio", "cuánto", "costo", "vale", "cuesta", "precios", "valor"]

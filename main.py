@@ -6,7 +6,7 @@ from flask import Flask, request
 app = Flask(__name__)
 
 # Enlace directo al catálogo general de WhatsApp Business de tu marca
-LINK_CATALOGO = "https://wa.me/c/176231148474470"
+LINK_CATALOGO = "https://wa.me/c/573103632461"
 
 # Diccionarios de palabras clave para el Procesamiento de Lenguaje Natural básico
 SALUDOS = ["hola", "buenas", "buen día", "buenas tardes", "buenos días", "qué tal", "hey", "info", "información"]

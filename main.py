@@ -68,7 +68,7 @@ CATALOGO_PRODUCTOS = {
 
 URL_CATALOGO = "https://wa.me/c/573103632461"
 
-
+# TEXTO DE BIENVENIDA QUE SE DISPARA DIRECTO SIN USAR TOKENS DE GROQ
 MENSAJE_BIENVENIDA = f"""¡Hola! 🌟 Bienvenidas a *Sofia Vasquez Accesorios* 💖. Estoy aquí para ayudarte a elegir tus joyas favoritas de forma rápida.
 
 *¿Qué puedes hacer conmigo?*
@@ -80,29 +80,27 @@ MENSAJE_BIENVENIDA = f"""¡Hola! 🌟 Bienvenidas a *Sofia Vasquez Accesorios* �
 
 ¿En qué te puedo ayudar hoy? 💕"""
 
+# SYSTEM PROMPT COMBINADO (TU MENSAJE + LAS REGLAS DE CONTROL)
 SYSTEM_PROMPT = f"""
 Eres Sofii, asesora de "Sofia Vasquez Accesorios". Atiende con tono amable, entusiasta y emojis (✨, 🥰, 💖). 
 Usa la base de datos (n=nombre, p=precio, cat=categoría, d=descripción): {CATALOGO_PRODUCTOS}
 
-REGLAS:
-1. Da precios y detalles exactos basándote en la base de datos.
-2. Si piden ver fotos, más modelos o colecciones, dales este link: {URL_CATALOGO}
-3. Si el precio dice "Consultar", diles amablemente que depende de la personalización y guíalas al catálogo: {URL_CATALOGO}
-4. No inventes productos ni alteres precios. Si no está en la lista, invítalas a mirar el catálogo de WhatsApp.
-5. Cuando el cliente tenga dudas entre varios productos, lístalos usando números claros (Ej: [1], [2]) e indícale que puede responder solo con el número de su elección.
-
-REGLAS DE ATENCIÓN Y TRANSFERENCIA HUMANA:
-1. Si el cliente solicita explícitamente hablar con un asesor, una persona real o soporte, responde amablemente confirmando que ha sido puesto en espera y NO respondas a ningún mensaje posterior.
-2. Si el cliente solicita un producto personalizado (como las cadenas de nombre donde el precio indica "Consultar"), infórmale que un asesor personalizado tomará los detalles del diseño y ponlo en espera.
-3. Si el cliente hace preguntas complejas que no están en la base de datos (ej. "¡Hola! ¿Tienen envíos internacionales?", "Me llegó un producto defectuoso", "¿Puedo pagar con un método de pago diferente?"), dile textualmente: "Para ayudarte con esa solicitud específica, te voy a dejar en espera un momento. Muy pronto un asesor especializado continuará la conversación contigo. ¡Gracias por tu paciencia! ✨"
-4. Cuando decidas transferir al usuario, tu respuesta final debe incluir siempre la frase clave: "[TRANSFERIR_A_HUMANO]"."
+REGLAS DE OPERACIÓN:
+1. Da precios y detalles exactos basándote en la lista. Si piden fotos o ver colecciones, dales este link: {URL_CATALOGO}
+2. Si el precio dice "Consultar" (como las piezas personalizadas), explica que depende del diseño y ponlos en espera agregando al final: [TRANSFERIR_A_HUMANO]
+3. Si piden hablar con un asesor real, soporte, humano, o si hacen preguntas complejas que no puedas resolver con los datos del catálogo, diles amablemente que los dejarás en espera y añade EXACTAMENTE la etiqueta: [TRANSFERIR_A_HUMANO]
 """
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    incoming_msg = request.values.get("Body", "").strip()
+    incoming_msg = request.values.get("Body", "").strip().lower()
     resp = MessagingResponse()
     msg = resp.message()
+
+    # Si el cliente saluda de manera general, responde con la bienvenida sin llamar a Groq (Ahorro de tokens)
+    if incoming_msg in ["hola", "buenas", "buenos dias", "buenas tardes", "hola!", "inicio", "buenas noches"]:
+        msg.body(MENSAJE_BIENVENIDA)
+        return str(resp)
 
     try:
         chat_completion = groq_client.chat.completions.create(
@@ -110,15 +108,21 @@ def webhook():
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": incoming_msg}
             ],
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             temperature=0.6,
         )
         reply_text = chat_completion.choices[0].message.content
+        
+        # Eliminar la etiqueta técnica antes de enviársela al usuario
+        if "[TRANSFERIR_A_HUMANO]" in reply_text:
+            reply_text = reply_text.replace("[TRANSFERIR_A_HUMANO]", "").strip()
+            # (Aquí podrás conectar la base de datos para activar el estado de espera más adelante)
+
         msg.body(reply_text)
 
     except Exception as e:
         print(f"Error en Groq: {e}")
-        msg.body("¡Hola! ✨ Estamos presentando alta demanda, pero puedes ver fotos y precios de todo nuestro inventario en el catálogo oficial: https://wa.me/c/573103632461 🥰")
+        msg.body(f"¡Hola! ✨ Estamos presentando alta demanda, pero puedes ver fotos y precios de todo nuestro inventario en el catálogo oficial: {URL_CATALOGO} 🥰")
 
     return str(resp)
 

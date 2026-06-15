@@ -68,64 +68,42 @@ CATALOGO_PRODUCTOS = {
 
 URL_CATALOGO = "https://wa.me/c/573103632461"
 
-# TEXTO DE BIENVENIDA QUE SE DISPARA DIRECTO SIN USAR TOKENS DE GROQ
-MENSAJE_BIENVENIDA ="""¡Hola! 🌟 Bienvenidas a *Sofia Vasquez Accesorios* 💖. Estoy aquí para ayudarte a elegir tus joyas favoritas de forma rápida.
 
-*¿Qué puedes hacer conmigo?*
-1️⃣ *Consultar productos:* Escribe el tipo de accesorio que buscas (ej. cadenas, topos, pulseras).
-2️⃣ *Ver fotos y modelos:* Si quieres ver el catálogo visual con fotos detalladas, haz clic aquí: {URL_CATALOGO} ✨.
-3️⃣ *Comprar:* Cuando te decidas por algo, dime el nombre o número del producto y la cantidad (ej. Quiero 2 cadenas de oso estándar).
 
-📌 *Nota: Si tienes una duda muy específica, deseas personalizar una prenda con tu nombre o necesitas soporte con un pago, solo pídelo y te transferiré de inmediato con un asesor humano para que te atienda personalmente. 🥰*
-
-¿En qué te puedo ayudar hoy? 💕"""
-
-# SYSTEM PROMPT COMBINADO (TU MENSAJE + LAS REGLAS DE CONTROL)
-SYSTEM_PROMPT = """
+SYSTEM_PROMPT = f"""
 Eres Sofii, asesora de "Sofia Vasquez Accesorios". Atiende con tono amable, entusiasta y emojis (✨, 🥰, 💖). 
-Usa la siguiente base de datos (n=nombre, p=precio, cat=categoría, d=descripción):
-""" + str(CATALOGO_PRODUCTOS) + """
+Usa la base de datos (n=nombre, p=precio, cat=categoría, d=descripción): {CATALOGO_PRODUCTOS}
 
-REGLAS DE OPERACIÓN:
-1. Da precios y detalles exactos basándote en la lista. Si piden fotos o ver colecciones, dales este link: {URL_CATALOGO}
-2. Si el precio dice "Consultar" (como las piezas personalizadas), explica que depende del diseño y ponlos en espera agregando al final: [TRANSFERIR_A_HUMANO]
-3. Si piden hablar con un asesor real, soporte, humano, o si hacen preguntas complejas que no puedas resolver con los datos del catálogo, diles amablemente que los dejarás en espera y añade EXACTAMENTE la etiqueta: [TRANSFERIR_A_HUMANO]
+REGLAS:
+1. Da precios y detalles exactos basándote en la base de datos.
+2. Si piden ver fotos, más modelos o colecciones, dales este link: {URL_CATALOGO}
+3. Si el precio dice "Consultar", diles amablemente que depende de la personalización y guíalas al catálogo: {URL_CATALOGO}
+4. No inventes productos ni alteres precios. Si no está en la lista, invítalas a mirar el catálogo de WhatsApp.
+5. Cuando el cliente tenga dudas entre varios productos, lístalos usando números claros (Ej: [1], [2]) e indícale que puede responder solo con el número de su elección.
+
+REGLAS DE ATENCIÓN Y TRANSFERENCIA HUMANA:
+1. Si el cliente solicita explícitamente hablar con un asesor, una persona real o soporte, responde amablemente confirmando que ha sido puesto en espera y NO respondas a ningún mensaje posterior.
+2. Si el cliente solicita un producto personalizado (como las cadenas de nombre donde el precio indica "Consultar"), infórmale que un asesor personalizado tomará los detalles del diseño y ponlo en espera.
+3. Si el cliente hace preguntas complejas que no están en la base de datos (ej. "¡Hola! ¿Tienen envíos internacionales?", "Me llegó un producto defectuoso", "¿Puedo pagar con un método de pago diferente?"), dile textualmente: "Para ayudarte con esa solicitud específica, te voy a dejar en espera un momento. Muy pronto un asesor especializado continuará la conversación contigo. ¡Gracias por tu paciencia! ✨"
+4. Cuando decidas transferir al usuario, tu respuesta final debe incluir siempre la frase clave: "[TRANSFERIR_A_HUMANO]"."
 """
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    # Aseguramos que si 'Body' no existe, sea un string vacío antes de aplicar funciones de texto
-    body_raw = request.values.get("Body", "")
-    if body_raw is None:
-        body_raw = ""
-        
-    incoming_msg = body_raw.strip().lower()
-    
+    incoming_msg = request.values.get("Body", "").strip()
     resp = MessagingResponse()
     msg = resp.message()
-
-    # LISTA DE SALUDOS EN MINÚSCULAS
-    SALUDOS = ["hola", "buenas", "buenos dias", "buenas tardes", "buenas noches", "hola!", "inicio", "hola sofii"]
-
-    # Si el mensaje coincide con un saludo, disparamos la bienvenida directa
-    if incoming_msg in SALUDOS:
-        msg.body(MENSAJE_BIENVENIDA)
-        return str(resp)
 
     try:
         chat_completion = groq_client.chat.completions.create(
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": body_raw} # Le pasamos el mensaje original a Groq
+                {"role": "user", "content": incoming_msg}
             ],
-            model="llama-3.1-8b-instant",
+            model="llama-3.3-70b-versatile",
             temperature=0.6,
         )
         reply_text = chat_completion.choices[0].message.content
-        
-        if "[TRANSFERIR_A_HUMANO]" in reply_text:
-            reply_text = reply_text.replace("[TRANSFERIR_A_HUMANO]", "").strip()
-
         msg.body(reply_text)
 
     except Exception as e:
@@ -133,6 +111,7 @@ def webhook():
         msg.body("¡Hola! ✨ Estamos presentando alta demanda, pero puedes ver fotos y precios de todo nuestro inventario en el catálogo oficial: https://wa.me/c/573103632461 🥰")
 
     return str(resp)
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

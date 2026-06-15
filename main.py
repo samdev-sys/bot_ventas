@@ -69,7 +69,7 @@ CATALOGO_PRODUCTOS = {
 URL_CATALOGO = "https://wa.me/c/573103632461"
 
 # TEXTO DE BIENVENIDA QUE SE DISPARA DIRECTO SIN USAR TOKENS DE GROQ
-MENSAJE_BIENVENIDA = f"""¡Hola! 🌟 Bienvenidas a *Sofia Vasquez Accesorios* 💖. Estoy aquí para ayudarte a elegir tus joyas favoritas de forma rápida.
+MENSAJE_BIENVENIDA ="""¡Hola! 🌟 Bienvenidas a *Sofia Vasquez Accesorios* 💖. Estoy aquí para ayudarte a elegir tus joyas favoritas de forma rápida.
 
 *¿Qué puedes hacer conmigo?*
 1️⃣ *Consultar productos:* Escribe el tipo de accesorio que buscas (ej. cadenas, topos, pulseras).
@@ -81,9 +81,10 @@ MENSAJE_BIENVENIDA = f"""¡Hola! 🌟 Bienvenidas a *Sofia Vasquez Accesorios* �
 ¿En qué te puedo ayudar hoy? 💕"""
 
 # SYSTEM PROMPT COMBINADO (TU MENSAJE + LAS REGLAS DE CONTROL)
-SYSTEM_PROMPT = f"""
+SYSTEM_PROMPT = """
 Eres Sofii, asesora de "Sofia Vasquez Accesorios". Atiende con tono amable, entusiasta y emojis (✨, 🥰, 💖). 
-Usa la base de datos (n=nombre, p=precio, cat=categoría, d=descripción): {CATALOGO_PRODUCTOS}
+Usa la siguiente base de datos (n=nombre, p=precio, cat=categoría, d=descripción):
+""" + str(CATALOGO_PRODUCTOS) + """
 
 REGLAS DE OPERACIÓN:
 1. Da precios y detalles exactos basándote en la lista. Si piden fotos o ver colecciones, dales este link: {URL_CATALOGO}

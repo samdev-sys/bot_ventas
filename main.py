@@ -94,12 +94,21 @@ REGLAS DE OPERACIÓN:
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    incoming_msg = request.values.get("Body", "").strip().lower()
+    # Aseguramos que si 'Body' no existe, sea un string vacío antes de aplicar funciones de texto
+    body_raw = request.values.get("Body", "")
+    if body_raw is None:
+        body_raw = ""
+        
+    incoming_msg = body_raw.strip().lower()
+    
     resp = MessagingResponse()
     msg = resp.message()
 
-    # Si el cliente saluda de manera general, responde con la bienvenida sin llamar a Groq (Ahorro de tokens)
-    if incoming_msg in ["hola", "buenas", "buenos dias", "buenas tardes", "hola!", "inicio", "buenas noches"]:
+    # LISTA DE SALUDOS EN MINÚSCULAS
+    SALUDOS = ["hola", "buenas", "buenos dias", "buenas tardes", "buenas noches", "hola!", "inicio", "hola sofii"]
+
+    # Si el mensaje coincide con un saludo, disparamos la bienvenida directa
+    if incoming_msg in SALUDOS:
         msg.body(MENSAJE_BIENVENIDA)
         return str(resp)
 
@@ -107,26 +116,23 @@ def webhook():
         chat_completion = groq_client.chat.completions.create(
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": incoming_msg}
+                {"role": "user", "content": body_raw} # Le pasamos el mensaje original a Groq
             ],
             model="llama-3.1-8b-instant",
             temperature=0.6,
         )
         reply_text = chat_completion.choices[0].message.content
         
-        # Eliminar la etiqueta técnica antes de enviársela al usuario
         if "[TRANSFERIR_A_HUMANO]" in reply_text:
             reply_text = reply_text.replace("[TRANSFERIR_A_HUMANO]", "").strip()
-            # (Aquí podrás conectar la base de datos para activar el estado de espera más adelante)
 
         msg.body(reply_text)
 
     except Exception as e:
         print(f"Error en Groq: {e}")
-        msg.body(f"¡Hola! ✨ Estamos presentando alta demanda, pero puedes ver fotos y precios de todo nuestro inventario en el catálogo oficial: {URL_CATALOGO} 🥰")
+        msg.body("¡Hola! ✨ Estamos presentando alta demanda, pero puedes ver fotos y precios de todo nuestro inventario en el catálogo oficial: https://wa.me/c/573103632461 🥰")
 
     return str(resp)
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

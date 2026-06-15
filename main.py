@@ -77,6 +77,7 @@ REGLAS:
 2. Si piden ver fotos, más modelos o colecciones, dales este link: {URL_CATALOGO}
 3. Si el precio dice "Consultar", diles amablemente que depende de la personalización y guíalas al catálogo: {URL_CATALOGO}
 4. No inventes productos ni alteres precios. Si no está en la lista, invítalas a mirar el catálogo de WhatsApp.
+5. Cuando el cliente tenga dudas entre varios productos, lístalos usando números claros (Ej: [1], [2]) e indícale que puede responder solo con el número de su elección."
 """
 
 @app.route("/webhook", methods=["POST"])
@@ -91,7 +92,7 @@ def webhook():
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": incoming_msg}
             ],
-            model="llama-3.1-8b-instant",
+            model="llama-3.2-11b-vision-preview",
             temperature=0.6,
         )
         reply_text = chat_completion.choices[0].message.content

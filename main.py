@@ -92,7 +92,7 @@ def webhook():
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": incoming_msg}
             ],
-            model="llama-3.2-11b-vision-preview",
+            model="llama-3.2-90b-vision-preview",
             temperature=0.6,
         )
         reply_text = chat_completion.choices[0].message.content

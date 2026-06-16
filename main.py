@@ -77,7 +77,7 @@ WELCOME_MSG = """¡Hola! 🌟 Bienvenidas a Sofia Vasquez Accesorios 💖. Estoy
 2️⃣ Ver fotos y modelos: Si quieres ver el catálogo visual con fotos detalladas, haz clic aquí: """ + URL_CATALOGO + """ ✨.
 3️⃣ Comprar: Cuando te decidas por algo, dime el nombre o número del producto y la cantidad (ej. Quiero 2 cadenas de oso estándar).
 
-📌 Nota: Si tienes una duda muy específica, deseas personalizar una prenda con tu nombre o necesitas soporte con un pago, solo pídelo y te transferiré de inmediato con un asesor humano para que te atienda personalmente. 🥰
+📌 Nota: Si tienes una duda muy específica, deseas personalizar una prenda con tu nombre o necesitas soporte con un pago, solo pídelo y te transferiré de inmediato con un asesor personalizado para que te atienda personalmente. 🥰
 
 ¿En qué te puedo ayudar hoy? 💕"""
 

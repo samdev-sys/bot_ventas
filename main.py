@@ -1,5 +1,6 @@
 import os
 import time
+import html
 from flask import Flask, request, Response
 from twilio.twiml.messaging_response import MessagingResponse
 from groq import Groq
@@ -105,6 +106,7 @@ def webhook():
             temperature=0.6,
         )
         reply_text = chat_completion.choices[0].message.content
+        reply_text = reply_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         resp.message(reply_text)
         print(f"[WEBHOOK] Respuesta enviada: {reply_text[:80]}...")
 
@@ -115,8 +117,14 @@ def webhook():
     elapsed = round(time.time() - start, 2)
     print(f"[WEBHOOK] Respondido en {elapsed}s")
     twiml_str = str(resp)
-    print(f"[WEBHOOK] TwiML: {twiml_str[:200]}")
+    print(f"[WEBHOOK] TwiML: {twiml_str}")
     return Response(twiml_str, mimetype="text/xml")
+
+
+@app.route("/status", methods=["POST"])
+def status():
+    print(f"[STATUS] Status callback: {request.values}")
+    return "OK", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

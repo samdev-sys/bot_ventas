@@ -252,16 +252,15 @@ def descargar_y_transcribir_audio(media_url):
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    if not verificar_horario_comercial():
-        print("[WEBHOOK] Fuera de horario comercial")
-        xml_response = f'<?xml version="1.0" encoding="UTF-8"?><Response><Message>{MENSAJE_FUERA_HORARIO}</Message></Response>'
-        return xml_response, 200, {'Content-Type': 'text/xml'}
-
     from_number = request.values.get("From", "unknown")
     start = time.time()
     num_media = int(request.values.get("NumMedia", 0))
 
     incoming_msg = request.values.get("Body", "").strip()
+
+    if not verificar_horario_comercial():
+        print("[WEBHOOK] Fuera de horario comercial — recordatorio activado")
+        incoming_msg = f"[RECORDATORIO HORARIO: el horario de atención es Dom 2-6PM y Lun-Sáb 2-8:30PM. Responde recordando esto amablemente y luego procede a atender su consulta como siempre.] {incoming_msg}"
 
     if num_media > 0:
         media_url = request.values.get("MediaUrl0")

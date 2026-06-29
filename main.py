@@ -371,7 +371,6 @@ def webhook():
     msg_lower = mensaje_original.lower().strip()
     if any(msg_lower.startswith(s) or msg_lower == s for s in SALUDOS):
         reply_text = WELCOME_MSG
-        reply_text = reply_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         resp.message(reply_text)
         print(f"[WEBHOOK] Saludo detectado — instrucciones enviadas")
         elapsed = round(time.time() - start, 2)
@@ -398,7 +397,6 @@ def webhook():
             print(f"[WEBHOOK] *** SOLICITUD DE ASESOR HUMANO *** De: {from_number}")
             reply_text = reply_text.replace("[AGENDAR_ASESOR_HUMANO]", "").strip()
 
-        reply_text = reply_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         resp.message(reply_text)
         print(f"[WEBHOOK] Respuesta enviada: {reply_text[:80]}...")
 

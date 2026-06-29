@@ -7,7 +7,7 @@ import requests
 import tempfile
 from datetime import datetime
 import pytz
-from flask import Flask, request
+from flask import Flask, request, Response as FlaskResponse
 from groq import Groq
 
 app = Flask(__name__)
@@ -331,7 +331,8 @@ def twiml_respuesta(texto):
     """Construye TwiML manualmente, escapando caracteres XML"""
     texto = texto.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     texto = texto.replace('"', "&quot;").replace("'", "&apos;")
-    return f'<?xml version="1.0" encoding="UTF-8"?><Response><Message>{texto}</Message></Response>'
+    twiml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Message>{texto}</Message></Response>'
+    return FlaskResponse(twiml, status=200, mimetype="text/xml")
 
 
 @app.route("/webhook", methods=["POST"])
@@ -378,7 +379,7 @@ def webhook():
             reply_text = WELCOME_MSG
             elapsed = round(time.time() - start, 2)
             print(f"[WEBHOOK] Saludo detectado — {elapsed}s")
-            return twiml_respuesta(reply_text), 200, {'Content-Type': 'text/xml'}
+            return twiml_respuesta(reply_text)
 
         historial = obtener_historial(from_number)
         historial.append({"role": "user", "content": incoming_msg})
@@ -399,17 +400,17 @@ def webhook():
 
         elapsed = round(time.time() - start, 2)
         print(f"[WEBHOOK] Respuesta ({elapsed}s): {reply_text[:80]}...")
-        return twiml_respuesta(reply_text), 200, {'Content-Type': 'text/xml'}
+        return twiml_respuesta(reply_text)
 
     except Exception as e:
         elapsed = round(time.time() - start, 2)
         print(f"[WEBHOOK] ERROR ({elapsed}s): {e}")
-        return twiml_respuesta("¡Hola! ✨ Estamos presentando alta demanda. Reintenta en unos segundos o escribe tu mensaje. 🥰"), 200, {'Content-Type': 'text/xml'}
+        return twiml_respuesta("¡Hola! ✨ Estamos presentando alta demanda. Reintenta en unos segundos o escribe tu mensaje. 🥰")
 
 
 @app.route("/ping", methods=["GET"])
 def ping():
-    return "pong", 200
+    return FlaskResponse("pong", status=200)
 
 
 @app.route("/webhook-test", methods=["GET", "POST"])

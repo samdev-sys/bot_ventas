@@ -136,7 +136,7 @@ def webhook():
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": incoming_msg}
             ],
-            model="llama-3.1-8b-instant",
+            model="openai/gpt-oss-20b",
             temperature=0.6,
         )
         reply_text = chat_completion.choices[0].message.content

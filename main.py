@@ -5,10 +5,9 @@ import html
 import base64
 import requests
 import tempfile
-import xml.etree.ElementTree as ET
 from datetime import datetime
 import pytz
-from flask import Flask, request, Response
+from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 from groq import Groq
 
@@ -378,7 +377,7 @@ def webhook():
         print(f"[WEBHOOK] Respondido en {elapsed}s")
         twiml_str = str(resp)
         print(f"[WEBHOOK] TwiML: {twiml_str}")
-        return Response(twiml_str, mimetype="text/xml")
+        return twiml_str, 200, {'Content-Type': 'text/xml'}
 
     try:
         historial = obtener_historial(from_number)
@@ -409,7 +408,22 @@ def webhook():
     print(f"[WEBHOOK] Respondido en {elapsed}s")
     twiml_str = str(resp)
     print(f"[WEBHOOK] TwiML: {twiml_str}")
-    return Response(twiml_str, mimetype="text/xml")
+    return twiml_str, 200, {'Content-Type': 'text/xml'}
+
+
+@app.route("/ping", methods=["GET"])
+def ping():
+    return "pong", 200
+
+
+@app.route("/webhook-test", methods=["GET", "POST"])
+def webhook_test():
+    """Endpoint para probar que Twilio puede comunicarse"""
+    if request.method == "POST":
+        print(f"[TEST] POST recibido: {request.values}")
+    r = MessagingResponse()
+    r.message("¡Hola! 🛍️ Esto es una prueba del bot de Sofiiaccesorios.")
+    return str(r), 200, {'Content-Type': 'text/xml'}
 
 
 @app.route("/status", methods=["POST"])

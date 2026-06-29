@@ -1,6 +1,9 @@
 import os
+import io
 import time
 import html
+import requests
+import tempfile
 from flask import Flask, request, Response
 from twilio.twiml.messaging_response import MessagingResponse
 from groq import Groq
@@ -136,12 +139,55 @@ CONOCIMIENTO DE INVENTARIO Y PRECIOS:
 - Sets: Juego Cadena y Topos Virgen - $28.000 | Set Trébol Rojo - $35.000 | Set Mariposa - $25.000 | Set Corazón Microcircón - $38.000 | Set Van Cleef Premium - $40.000 | Set Cadena y Topos Oso - $25.000.
 """
 
+def descargar_y_transcribir_audio(media_url):
+    account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+    auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+    if not account_sid or not auth_token:
+        print("[AUDIO] Faltan credenciales Twilio para descargar audio")
+        return None
+
+    try:
+        resp = requests.get(media_url, auth=(account_sid, auth_token), timeout=30)
+        resp.raise_for_status()
+        audio_data = io.BytesIO(resp.content)
+        audio_data.name = "audio.ogg"
+        print(f"[AUDIO] Descargado: {len(resp.content)} bytes")
+
+        transcription = groq_client.audio.transcriptions.create(
+            model="whisper-large-v3-turbo",
+            file=audio_data,
+            language="es",
+        )
+        texto = transcription.text.strip()
+        print(f"[AUDIO] Transcripción: {texto}")
+        return texto
+
+    except Exception as e:
+        print(f"[AUDIO] Error: {e}")
+        return None
+
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    incoming_msg = request.values.get("Body", "").strip()
     from_number = request.values.get("From", "unknown")
     start = time.time()
-    print(f"[WEBHOOK] Mensaje de {from_number}: {incoming_msg}")
+    num_media = int(request.values.get("NumMedia", 0))
+
+    incoming_msg = request.values.get("Body", "").strip()
+
+    if num_media > 0:
+        media_url = request.values.get("MediaUrl0")
+        media_type = request.values.get("MediaContentType0", "")
+        print(f"[WEBHOOK] Audio detectado de {from_number} | tipo: {media_type}")
+
+        transcripcion = descargar_y_transcribir_audio(media_url)
+        if transcripcion:
+            incoming_msg = f"[Transcripción de audio del cliente: {transcripcion}]"
+            print(f"[WEBHOOK] Mensaje transcrito: {transcripcion}")
+        else:
+            incoming_msg = "[El cliente envió un audio que no pudo transcribirse]"
+    else:
+        print(f"[WEBHOOK] Mensaje de {from_number}: {incoming_msg}")
 
     resp = MessagingResponse()
 

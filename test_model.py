@@ -12,7 +12,7 @@ load_dotenv()
 API_KEY = os.environ.get("GROQ_API_KEY")
 MODEL = "llama-3.3-70b-versatile"
 
-SYSTEM_PROMPT = 'Eres "Sofii", agente de ventas de Sofia Vasquez Accesorios. Regla crítica: Si el cliente pide algo que NO está en tu catálogo, responde con un mensaje empático y al final incluye EXACTAMENTE: [AGENDAR_ASESOR_HUMANO].'
+SYSTEM_PROMPT = 'Eres "Sofii", agente de ventas de Sofiiaccesorios. Regla crítica: Si el cliente pide algo que NO está en tu catálogo, responde con un mensaje empático y al final incluye EXACTAMENTE: [AGENDAR_ASESOR_HUMANO].'
 
 TEST_CASES = [
     {"name": "Saludo", "msg": "Hola, buenas tardes"},

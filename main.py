@@ -15,6 +15,32 @@ app = Flask(__name__)
 
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
+# MEMORIA DE CONVERSACIÓN POR USUARIO (TTL 30 min)
+CONVERSACIONES = {}
+CONVERSACION_TTL = 172800  # 48 horas en segundos
+
+
+def obtener_historial(numero):
+    ahora = time.time()
+    if numero in CONVERSACIONES:
+        if ahora - CONVERSACIONES[numero]["ultimo"] < CONVERSACION_TTL:
+            CONVERSACIONES[numero]["ultimo"] = ahora
+            return CONVERSACIONES[numero]["mensajes"]
+        else:
+            del CONVERSACIONES[numero]
+    return []
+
+
+def guardar_mensaje(numero, rol, contenido):
+    ahora = time.time()
+    if numero not in CONVERSACIONES:
+        CONVERSACIONES[numero] = {"mensajes": [], "ultimo": ahora}
+    CONVERSACIONES[numero]["mensajes"].append({"role": rol, "content": contenido})
+    CONVERSACIONES[numero]["ultimo"] = ahora
+    if len(CONVERSACIONES[numero]["mensajes"]) > 20:
+        CONVERSACIONES[numero]["mensajes"] = CONVERSACIONES[numero]["mensajes"][-20:]
+
+
 # CATÁLOGO ULTRA-COMPACTADO PARA AHORRO DE TOKENS
 CATALOGO_PRODUCTOS = {
     # Cadenas / Gargantillas / Chokers
@@ -355,15 +381,18 @@ def webhook():
         return Response(twiml_str, mimetype="text/xml")
 
     try:
+        historial = obtener_historial(from_number)
+        historial.append({"role": "user", "content": incoming_msg})
+
         chat_completion = groq_client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": incoming_msg}
-            ],
+            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + historial,
             model="llama-3.3-70b-versatile",
             temperature=0.6,
         )
         reply_text = chat_completion.choices[0].message.content
+
+        guardar_mensaje(from_number, "user", incoming_msg)
+        guardar_mensaje(from_number, "assistant", reply_text)
 
         if "[AGENDAR_ASESOR_HUMANO]" in reply_text:
             print(f"[WEBHOOK] *** SOLICITUD DE ASESOR HUMANO *** De: {from_number}")

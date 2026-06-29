@@ -92,14 +92,24 @@ CATALOGO_PRODUCTOS = {
 }
 URL_CATALOGO = "https://wa.me/c/573103632461"
 
-WELCOME_MSG = """¡Hola! 🌟 Bienvenidas a Sofiiaccesorios 💖. Estoy aquí para ayudarte a elegir tus joyas favoritas de forma rápida.
+INSTRUCCIONES = """✨ *Cómo hablar conmigo — Tu asistente de Sofiiaccesorios* ✨
 
-¿Qué puedes hacer conmigo?
-1️⃣ Consultar productos: Escribe el tipo de accesorio que buscas (ej. cadenas, topos, pulseras).
-2️⃣ Ver fotos y modelos: Si quieres ver el catálogo visual con fotos detalladas, haz clic aquí: """ + URL_CATALOGO + """ ✨.
-3️⃣ Comprar: Cuando te decidas por algo, dime el nombre o número del producto y la cantidad (ej. Quiero 2 cadenas de oso estándar).
+1️⃣ *Escribe normal*: Di lo que necesitas como si hablaras con una amiga. Ej: "¿Qué cadenas tienen?", "Cuánto vale la pulsera"
 
-📌 Nota: Si tienes una duda muy específica, deseas personalizar una prenda con tu nombre o necesitas soporte con un pago, solo pídelo y te transferiré de inmediato con un asesor personalizado para que te atienda personalmente. 🥰
+2️⃣ *¿Enviaste audio?* 🎤 Lo escucho y te respondo por escrito.
+
+3️⃣ *Catálogo visual* 📸
+👉 """ + URL_CATALOGO + """
+
+4️⃣ *Comprar*: Cuando te decidas, dime producto y cantidad. Te pediré tus datos de envío y métodos de pago.
+
+5️⃣ *¿No encuentras algo?* Te conecto con una asesora humana 💕
+
+✨ Horario: Dom 2-6PM · Lun-Sáb 2-8:30PM"""
+
+WELCOME_MSG = """¡Hola! 🌟 Bienvenidas a Sofiiaccesorios 💖
+
+""" + INSTRUCCIONES + """
 
 ¿En qué te puedo ayudar hoy? 💕"""
 
@@ -257,6 +267,7 @@ def webhook():
     num_media = int(request.values.get("NumMedia", 0))
 
     incoming_msg = request.values.get("Body", "").strip()
+    mensaje_original = incoming_msg
 
     if not verificar_horario_comercial():
         print("[WEBHOOK] Fuera de horario comercial — recordatorio activado")
@@ -269,6 +280,7 @@ def webhook():
 
         transcripcion = descargar_y_transcribir_audio(media_url)
         if transcripcion:
+            mensaje_original = transcripcion
             incoming_msg = f"[Transcripción de audio del cliente: {transcripcion}]"
             print(f"[WEBHOOK] Mensaje transcrito: {transcripcion}")
         else:
@@ -277,6 +289,18 @@ def webhook():
         print(f"[WEBHOOK] Mensaje de {from_number}: {incoming_msg}")
 
     resp = MessagingResponse()
+
+    msg_lower = mensaje_original.lower().strip()
+    if any(msg_lower.startswith(s) or msg_lower == s for s in SALUDOS):
+        reply_text = WELCOME_MSG
+        reply_text = reply_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        resp.message(reply_text)
+        print(f"[WEBHOOK] Saludo detectado — instrucciones enviadas")
+        elapsed = round(time.time() - start, 2)
+        print(f"[WEBHOOK] Respondido en {elapsed}s")
+        twiml_str = str(resp)
+        print(f"[WEBHOOK] TwiML: {twiml_str}")
+        return Response(twiml_str, mimetype="text/xml")
 
     try:
         chat_completion = groq_client.chat.completions.create(

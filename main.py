@@ -2,6 +2,7 @@ import os
 import io
 import time
 import html
+import base64
 import requests
 import tempfile
 from datetime import datetime
@@ -178,7 +179,7 @@ Lunes a Sábado: 2:00 PM - 8:30 PM"""
 
 MENSAJE_FUERA_HORARIO = """En este momento está cerrado
 Nuestro horario comercial es el siguiente:
-Domingo: 2:00 PM - 6:00 PM
+
 Lunes: 2:00 PM - 8:30 PM
 Martes: 2:00 PM - 8:30 PM
 Miércoles: 2:00 PM - 8:30 PM
@@ -212,6 +213,8 @@ REGLAS DE INYECCIÓN DE TEXTO OBLIDATORIAS:
 """ + HORARIO_ATENCION + """
 
 REGLAS CONVERSACIONALES ADICIONALES:
+- NUNCA uses apelativos cariñosos como "amor", "belleza", "querida", "princesa", "bella", "cielo" ni ningún nickname. En su lugar saluda con "¡Hola!" o "¡Hola!" directo. Ejemplo: "¡Claro que sí!" (sin "amor").
+- NUNCA inventes materiales o artículos que no estén en tu catálogo. Si un cliente pregunta por algo como "cuero", "plata", "oro" u otro material que no tenemos, responde con: "No tenemos eso, pero te dejo en lista de espera para que nuestro equipo te contacte 😊" y añade: [AGENDAR_ASESOR_HUMANO]. Solo vende lo que aparece en tu catálogo.
 - Mantén tus respuestas relativamente cortas, dinámicas y directas, ideales para una lectura rápida en pantallas de WhatsApp.
 - Si el cliente pregunta por un artículo, color o especificación que NO está registrado en tu catálogo provisto por el sistema, infórmale de manera empática que lo registrarás en la lista de espera y añade al final de tu respuesta la siguiente etiqueta exacta: [AGENDAR_ASESOR_HUMANO]
 """
@@ -230,6 +233,45 @@ def verificar_horario_comercial():
         cierre = ahora.replace(hour=20, minute=30, second=0, microsecond=0).time()
 
     return apertura <= hora_actual <= cierre
+
+
+def analizar_imagen(media_url):
+    account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+    auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+    if not account_sid or not auth_token:
+        print("[IMAGEN] Faltan credenciales Twilio")
+        return None
+
+    try:
+        resp = requests.get(media_url, auth=(account_sid, auth_token), timeout=30)
+        resp.raise_for_status()
+        img_bytes = resp.content
+        print(f"[IMAGEN] Descargada: {len(img_bytes)} bytes")
+
+        img_b64 = base64.b64encode(img_bytes).decode("utf-8")
+        content_type = resp.headers.get("Content-Type", "image/jpeg")
+        if ";" in content_type:
+            content_type = content_type.split(";")[0].strip()
+
+        completion = groq_client.chat.completions.create(
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Describe brevemente qué es esta imagen en 1-2 oraciones. Si es un accesorio o joya, describe tipo, color, material y estilo. Responde solo con la descripción, sin saludos."},
+                    {"type": "image_url", "image_url": {"url": f"data:{content_type};base64,{img_b64}"}}
+                ]
+            }],
+            temperature=0.3,
+            max_completion_tokens=150,
+        )
+        descripcion = completion.choices[0].message.content.strip()
+        print(f"[IMAGEN] Análisis: {descripcion}")
+        return descripcion
+
+    except Exception as e:
+        print(f"[IMAGEN] Error: {e}")
+        return None
 
 
 def descargar_y_transcribir_audio(media_url):
@@ -276,15 +318,25 @@ def webhook():
     if num_media > 0:
         media_url = request.values.get("MediaUrl0")
         media_type = request.values.get("MediaContentType0", "")
-        print(f"[WEBHOOK] Audio detectado de {from_number} | tipo: {media_type}")
 
-        transcripcion = descargar_y_transcribir_audio(media_url)
-        if transcripcion:
-            mensaje_original = transcripcion
-            incoming_msg = f"[Transcripción de audio del cliente: {transcripcion}]"
-            print(f"[WEBHOOK] Mensaje transcrito: {transcripcion}")
+        if media_type.startswith("image/"):
+            print(f"[WEBHOOK] Imagen detectada de {from_number} | tipo: {media_type}")
+            descripcion = analizar_imagen(media_url)
+            if descripcion:
+                mensaje_original = descripcion
+                incoming_msg = f"[El cliente envió una imagen. Descripción: {descripcion}]"
+                print(f"[WEBHOOK] Imagen analizada: {descripcion}")
+            else:
+                incoming_msg = "[El cliente envió una imagen que no pudo analizarse]"
         else:
-            incoming_msg = "[El cliente envió un audio que no pudo transcribirse]"
+            print(f"[WEBHOOK] Audio detectado de {from_number} | tipo: {media_type}")
+            transcripcion = descargar_y_transcribir_audio(media_url)
+            if transcripcion:
+                mensaje_original = transcripcion
+                incoming_msg = f"[Transcripción de audio del cliente: {transcripcion}]"
+                print(f"[WEBHOOK] Mensaje transcrito: {transcripcion}")
+            else:
+                incoming_msg = "[El cliente envió un audio que no pudo transcribirse]"
     else:
         print(f"[WEBHOOK] Mensaje de {from_number}: {incoming_msg}")
 

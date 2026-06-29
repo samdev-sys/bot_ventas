@@ -11,66 +11,83 @@ groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 # CATÁLOGO ULTRA-COMPACTADO PARA AHORRO DE TOKENS
 CATALOGO_PRODUCTOS = {
-    # Cadenas
+    # Cadenas / Gargantillas / Chokers
     "c_m_oso": {"n": "Cadena Maxi Oso Articulado", "p": "$28.000", "cat": "cad", "d": "Dije grande. Rodio."},
     "c_oso_e": {"n": "Cadena Oso Articulado Estándar", "p": "$28.000", "cat": "cad", "d": "Movimiento sutil. Rodio."},
     "c_m_cruz": {"n": "Maxi Cruz Brillante", "p": "$24.000", "cat": "cad", "d": "Modelo Maxi Cruz-Shine. Rodio."},
-    "c_chok1": {"n": "Chokers #1 (unidad)", "p": "$15.000", "cat": "cad", "d": "Gargantilla corta ajustable. Rodio."},
+    "c_chok1": {"n": "Chokers #1 (unidad)", "p": "$15.000", "cat": "cad", "d": "Material Rodio. Gargantilla corta ajustable."},
     "c_g_lazo": {"n": "Gargantilla Lazo Mediana", "p": "$28.000", "cat": "cad", "d": "Tejido tipo lazo. Rodio."},
     "c_g_cub": {"n": "Gargantilla Cubana", "p": "$20.000", "cat": "cad", "d": "Eslabón clásico brillante. Rodio."},
-    "c_cam_cr": {"n": "Camándula en Cristal", "p": "$18.000", "cat": "cad", "d": "Cuentas de cristal y dijes religiosos."},
-    "c_cam_ac": {"n": "Camándula en Acero", "p": "$25.000", "cat": "cad", "d": "Medalla San Benito y cruz. Acero Inox."},
+    "c_g_vcleef": {"n": "Gargantilla Van Cleef en Rodio", "p": "$22.000", "cat": "cad", "d": "Diseño tréboles Van Cleef estilizados."},
+    "c_g_cuarzo": {"n": "Gargantilla en Cuarzo", "p": "$20.000", "cat": "cad", "d": "Material covergold rodinado con cuarzo."},
+    "c_col_cord": {"n": "Collares en Cordón", "p": "$18.000", "cat": "cad", "d": "Cordón con dijes variados."},
+    "c_d_cor25": {"n": "Cadena Dije Corazón", "p": "$25.000", "cat": "cad", "d": "Dije corazón brillante."},
+    "c_d_oturco": {"n": "Cadena Dije Ojo Turco", "p": "$20.000", "cat": "cad", "d": "Baño de rodio con perlas sutiles."},
+    "c_d_luna": {"n": "Cadena Dije Luna Rodio", "p": "$18.000", "cat": "cad", "d": "Dije de luna brillante. Rodio."},
+    "c_g_choker": {"n": "Gargantilla Choker en Rodio", "p": "$15.000", "cat": "cad", "d": "Estilo choker con dijes colgantes."},
+    "c_s_plana": {"n": "Cadena Snake Plana Dorada", "p": "$20.000", "cat": "cad", "d": "Material Acero premium."},
+    "c_strass_d": {"n": "Cadena Strass Dorada", "p": "$27.000", "cat": "cad", "d": "Material baño en rodio brillante."},
+    "c_m_clip": {"n": "Cadena Maxi Clip", "p": "$22.000", "cat": "cad", "d": "Eslabón tipo clip grande. Baño en rodio."},
+    "c_rel_rod": {"n": "Cadenas Religiosas Baño Rodio", "p": "$22.000", "cat": "cad", "d": "Modelos religiosos variados (cruces, medallas)."},
+    "c_rel_20": {"n": "Cadenas Religiosas Especiales", "p": "$20.000", "cat": "cad", "d": "Baño de rodio premium."},
+    "c_ac_par": {"n": "Cadenas en Acero para Pareja", "p": "$25.000", "cat": "cad_p", "d": "Precio por el par de cadenas."},
     "c_n_lisa": {"n": "Cadena Nombre Lisa", "p": "Consultar", "cat": "cad_p", "d": "Personalizada. Letra lisa."},
     "c_n_bril": {"n": "Cadena Nombre Brillante", "p": "Consultar", "cat": "cad_p", "d": "Personalizada. Letra brillante."},
 
     # Anillos
-    "a_chunky": {"n": "Anillos Chunky Dorados (unidad)", "p": "$15.000", "cat": "an", "d": "Gruesos de tendencia. Rodio."},
+    "a_chunky": {"n": "Anillos Chunky Dorados / Rodio", "p": "$15.000", "cat": "an", "d": "Gruesos de tendencia, ajustables."},
     "a_serp": {"n": "Anillos Serpiente (unidad)", "p": "$18.000", "cat": "an", "d": "Forma de serpiente. Rodio."},
     "a_3grad": {"n": "Anillos 3° (unidad)", "p": "$15.000", "cat": "an", "d": "Diseño geométrico sutil. Rodio."},
 
     # Tobilleras
-    "t_den_sb": {"n": "Tobillera Denario San Benito", "p": "$18.000", "cat": "tob", "d": "Tipo denario. Acero."},
+    "t_den_sb": {"n": "Tobillera Denario San Benito", "p": "$18.000", "cat": "tob", "d": "Material Acero, tipo denario ajustable."},
     "t_7nud": {"n": "Tobilleras 7 Nudos", "p": "$8.000", "cat": "tob", "d": "Hilo rojo con dije en acero."},
     "t_amu_sb": {"n": "Tobillera Amuleto San Benito", "p": "$20.000", "cat": "tob", "d": "Ojo turco y medalla. Oro/Plata. Rodio."},
+    "t_ac_dama": {"n": "Tobilleras en Acero Dama", "p": "$18.000", "cat": "tob", "d": "Eslabón delicado brillante en acero."},
 
-    # Relicarios
-    "r_acero": {"n": "Relicarios en Acero (40cm)", "p": "$25.000", "cat": "rel", "d": "Corazón o circular para fotos. Acero."},
+    # Sets Completos (Juegos de Cadena + Topos / Combinados)
+    "s_juego_v": {"n": "Juego Cadena y Topos Virgen", "p": "$28.000", "cat": "set_c", "d": "Covergold rodinado con medalla religiosa."},
+    "s_juego_g": {"n": "Juego Gargantilla y Aretes", "p": "$60.000", "cat": "set_c", "d": "Material rodinado de alta gama con piedras verdes."},
+    "s_trebol_r": {"n": "Set Trébol Rojo", "p": "$35.000", "cat": "set_c", "d": "Cadena y topos trébol rojo. Covergold rodinado."},
+    "s_mariposa": {"n": "Set Mariposa", "p": "$25.000", "cat": "set_c", "d": "Cadena y topos mariposa. Covergold rodinado."},
+    "s_cor_mcirc": {"n": "Set Corazón Microcircón", "p": "$38.000", "cat": "set_c", "d": "Cadena y topos corazón microengastado."},
+    "s_g_vcleef40": {"n": "Set Gargantilla Van Cleef Premium", "p": "$40.000", "cat": "set_c", "d": "Covergold rodinado estilo premium."},
+    "s_cad_oso25": {"n": "Set Cadena y Topos Oso", "p": "$25.000", "cat": "set_c", "d": "Dije oso. Con pulsera incluida por $35.000."},
 
-    # Aretes, Topos y Earcuffs
-    "e_cand_p": {"n": "Candongas de Perlas", "p": "$25.000", "cat": "ar_r", "d": "Medianas con perlas colgantes. Rodio."},
-    "e_set_cl": {"n": "Set Candongas Lisas Doradas", "p": "$32.000", "cat": "ar_r", "d": "Variado de candongas lisas. Rodio."},
-    "e_set_cb": {"n": "Set Candongas Bolitas", "p": "$40.000", "cat": "ar_r", "d": "Detalles de esferas. Rodio."},
-    "e_ear_t": {"n": "Est Earcuffs", "p": "$15.000", "cat": "ear", "d": "Texturizado. Sin perforación. Covergold."},
-    "e_ear_e": {"n": "Earcuffs Estilo Eslabón", "p": "$15.000", "cat": "ear", "d": "Diseño cadena. Sin perforación. Covergold."},
-    "e_ear_l": {"n": "Earcuffs Lisos Clásicos", "p": "$12.000", "cat": "ear", "d": "Minimalistas pulidos. Sin perforación. Rodio."},
-    "e_top_rc": {"n": "Topos Set Rodio Clásicos", "p": "$18.000", "cat": "top_s", "d": "Modelos pequeños combinables. Rodio."},
-    "e_top_rv": {"n": "Topos Set Rodio Variados", "p": "$18.000", "cat": "top_s", "d": "Figuras. Set x2 $18k / Set x3 $27k. Rodio."},
-    "e_top_d3": {"n": "Topos Set Rodio Dorados x3", "p": "$27.000", "cat": "top_s", "d": "Tres pares dorados premium. Rodio."},
-    "e_are_m": {"n": "Aretes Hechos a Mano Corazones", "p": "$18.000", "cat": "ar_m", "d": "Tejido artesanal, base dorada."},
-    "e_are_la": {"n": "Aretes Largos en Acero", "p": "$15.000", "cat": "ar_m", "d": "Cadena colgante delgada. Acero dorado."},
-    "e_are_bf": {"n": "Aretes Brillantes Fantasía", "p": "$10.000", "cat": "ar_m", "d": "Maxi aretes colgantes con strass."},
+    # Aretes, Topos y Candongas
+    "e_cand_p": {"n": "Candongas de Perlas", "p": "$25.000", "cat": "ar", "d": "Medianas con perlas colgantes. Rodio."},
+    "e_cand_m15": {"n": "Candongas Medianas Básicas", "p": "$15.000", "cat": "ar", "d": "Modelos pulidos medianos."},
+    "e_cand_pm": {"n": "Candongas Pequeñas-Medianas", "p": "$12.000", "cat": "ar", "d": "Argollas texturizadas o lisas."},
+    "e_cand_m_chu": {"n": "Candonga Mediana Chunky", "p": "$18.000", "cat": "ar", "d": "Estilo grueso texturizado de tendencia."},
+    "e_cand_peq15": {"n": "Candongas Pequeñas Especiales", "p": "$15.000", "cat": "ar", "d": "Baño de rodio."},
+    "e_ear_l": {"n": "Earcuffs Lisos Clásicos", "p": "$12.000", "cat": "ar", "d": "Minimalistas pulidos. Sin perforación. Rodio."},
+    "e_ear_est": {"n": "Est Earcuffs Premium", "p": "$15.000", "cat": "ar", "d": "Covergold rodinado texturizado ancho."},
+    "e_orejera": {"n": "Orejera Serpiente", "p": "$18.000", "cat": "ar", "d": "Covergold rodinado con silueta de serpiente."},
+    "e_top_r12": {"n": "Topos Pequeños Rodio", "p": "$12.000", "cat": "ar", "d": "Diseños pequeños básicos antialérgicos."},
+    "e_top_perl18": {"n": "Topos de Perlas Elegantes", "p": "$18.000", "cat": "ar", "d": "Acabado perlado con marco texturizado."},
+    "e_top_rv": {"n": "Topos Set Rodio Variados", "p": "$18.000", "cat": "ar", "d": "Figuras. Set x2 es $18.000 / Set x3 es $27.000."},
+    "e_set_c_rod": {"n": "Sets Candongas Rodio", "p": "$30.000", "cat": "ar", "d": "Variedad en sets. Set x2 $20.000 / Set x3 $30.000."},
+    "e_m_acer": {"n": "Maxitopos Material Acero", "p": "$15.000", "cat": "ar", "d": "Precio por par. Varias texturas doradas."},
 
     # Joyeros
+    "j_cor": {"n": "Joyero Corazón", "p": "$28.000", "cat": "joy", "d": "Forma corazón. Disponible sólo color negro."},
     "j_cuad_p": {"n": "Joyero Cuadrado Pequeño", "p": "$25.000", "cat": "joy", "d": "Portátil. Sintético texturizado."},
     "j_red": {"n": "Joyero Redondo", "p": "$25.000", "cat": "joy", "d": "Compacto. Negro o Verde Menta."},
-    "j_cor": {"n": "Joyero Corazón", "p": "$28.000", "cat": "joy", "d": "Forma corazón. Solo Negro."},
-    "j_grad_es": {"n": "Joyero Grande con Espejo", "p": "$45.000", "cat": "joy", "d": "Alta capacidad, compartimentos y cierre."},
+    "j_grad_es": {"n": "Joyero Grande con Espejo", "p": "$45.000", "cat": "joy", "d": "Alta capacidad con compartimentos."},
 
-    # Pulseras, Brazaletes y Pandoras
-    "p_pan_r": {"n": "Pandoras Rodinadas Premium", "p": "Consultar", "cat": "pan", "d": "Balines y dijes de alta calidad. Rodio."},
-    "p_pan_ac": {"n": "Pandoras Acero Covergold", "p": "$50.000", "cat": "pan", "d": "Charms variados y cruz. Acero/Covergold."},
-    "p_bra_lc": {"n": "Brazalete Love Cartier", "p": "$25.000", "cat": "braz", "d": "Rígido, diseño icónico minimalista. Rodio."},
-    "p_bra_ra": {"n": "Brazaletes Rígidos (unidad)", "p": "$20.000", "cat": "braz", "d": "Abierto con nudo central. Rodio."},
-    "p_duo_cc": {"n": "Dúo Clavo Cartier", "p": "$20.000", "cat": "braz", "d": "Incluye brazalete rígido y anillo ajustable. Rodio."},
-    "p_pul_neo": {"n": "Pulseras Neopreno Parejas", "p": "$25.000", "cat": "par", "d": "Ajustables, balines dorados. Color a elección."},
-    "p_pul_dij": {"n": "Pulseras Parejas con Dijes", "p": "$30.000", "cat": "par", "d": "Set x2 de hilo. Dijes complementarios."},
-    "p_pul_esp": {"n": "Pulseras Parejas Especiales", "p": "$25.000", "cat": "par", "d": "Set x2 de hilo. Dije corona o esfera."},
-    "p_pul_bal": {"n": "Pulsera Balines en Rodio", "p": "$12.000", "cat": "pul", "d": "Balines dorados brillantes. Rodio."}
+    # Pulseras y Brazaletes
+    "p_pul_cord": {"n": "Pulseras Cordón Graduables", "p": "$18.000", "cat": "pul", "d": "Material covergold rodinado con cordón fino."},
+    "p_pul_rodg": {"n": "Pulseras Rodio Graduables", "p": "$18.000", "cat": "pul", "d": "Eslabón o balines delgados ajustables."},
+    "p_b_snake": {"n": "Brazalete Snake King", "p": "$18.000", "cat": "pul", "d": "Material Rodinado texturizado rígido ajustable."},
+    "p_pul_mult": {"n": "Pulseras Multidijes", "p": "$23.000", "cat": "pul", "d": "Cadena delgada con dijes colgantes variados."},
+    "p_pul_hilo": {"n": "Pulseras Rodio Hilo", "p": "$18.000", "cat": "pul", "d": "Hilo con balines o dijes centrales en rodio."},
+    "p_pul_neo": {"n": "Pulseras Neopreno Parejas", "p": "$25.000", "cat": "pul", "d": "Ajustables, balines dorados."},
+    "p_par_peq": {"n": "Pulseras Parejas Pequeñas", "p": "$25.000", "cat": "pul", "d": "Set x2 de hilo ajustable con corona o esfera."},
+    "p_pan_r": {"n": "Pandoras Rodinadas Premium", "p": "Consultar", "cat": "pul", "d": "Balines y dijes de alta calidad. Rodio."}
 }
-
 URL_CATALOGO = "https://wa.me/c/573103632461"
 
-WELCOME_MSG = """¡Hola! 🌟 Bienvenidas a Sofia Vasquez Accesorios 💖. Estoy aquí para ayudarte a elegir tus joyas favoritas de forma rápida.
+WELCOME_MSG = """¡Hola! 🌟 Bienvenidas a Sofiiaccesorios 💖. Estoy aquí para ayudarte a elegir tus joyas favoritas de forma rápida.
 
 ¿Qué puedes hacer conmigo?
 1️⃣ Consultar productos: Escribe el tipo de accesorio que buscas (ej. cadenas, topos, pulseras).
@@ -84,41 +101,35 @@ WELCOME_MSG = """¡Hola! 🌟 Bienvenidas a Sofia Vasquez Accesorios 💖. Estoy
 SALUDOS = ["hola", "buenas", "buen día", "buenas tardes", "buenos días", "qué tal", "hey", "buenass", "buenos dias"]
 
 SYSTEM_PROMPT = """
-Eres "Sofi", la asistente virtual experta en ventas de 'Sofiaccesorios'. Tu objetivo es atender con amabilidad, naturalidad, entusiasmo y un tono muy femenino, usando emojis de forma estética (✨, 💖, 🛍️, 🥰).
+Eres "Sofii", el agente de ventas virtual exclusivo de 'Sofia Vasquez Accesorios'. Tu misión principal es guiar, asesorar y acompañar al usuario con total amabilidad, entusiasmo y un tono muy femenino (usando emojis estéticos como ✨, 💖, 🛍️, 🥰) en todo su proceso de compra, desde el saludo inicial hasta el cierre de la venta.
 
-MENSAJE DE BIENVENIDA (solo cuando el cliente dice Hola u otro saludo por primera vez):
-Envía este mensaje exacto sin modificarlo:
-"¡Hola! 🌟 Bienvenidas a Sofia Vasquez Accesorios 💖. Estoy aquí para ayudarte a elegir tus joyas favoritas de forma rápida.
+BASE DE DATOS DE PRODUCTOS Y ENLACES:
+- Usa el catálogo simplificado provisto en el sistema.
+- Link del catálogo oficial para ver fotos: https://wa.me/c/573103632461
 
-¿Qué puedes hacer conmigo?
-1️⃣ Consultar productos: Escribe el tipo de accesorio que buscas (ej. cadenas, topos, pulseras).
-2️⃣ Ver fotos y modelos: Si quieres ver el catálogo visual con fotos detalladas, haz clic aquí: https://wa.me/c/573103632461 ✨.
-3️⃣ Comprar: Cuando te decidas por algo, dime el nombre o número del producto y la cantidad (ej. Quiero 2 cadenas de oso estándar).
+REGLAS DE COMPORTAMIENTO CONVERSACIONAL:
 
-📌 Nota: Si tienes una duda muy específica, deseas personalizar una prenda con tu nombre o necesitas soporte con un pago, solo pídelo y te transferiré de inmediato con un asesor humano para que te atienda personalmente. 🥰
+1. ETAPA DE SALUDO Y ASESORÍA:
+   - Da una cálida bienvenida. Si el usuario pregunta por una categoría o producto disponible, lístalo de forma ordenada y clara con su precio. Siempre recuérdales de manera sutil que pueden ver las fotos detalladas en el link del catálogo oficial.
 
-¿En qué te puedo ayudar hoy? 💕"
+2. ETAPA DE CIERRE DE VENTA:
+   - Si el cliente muestra intención de comprar o dice palabras como "quiero ordenar", "separar" o "llevar", acompáñalo con entusiasmo y solicita de forma clara y directa en un solo mensaje los datos de envío: Nombre completo, Ciudad, Dirección de entrega y Teléfono. Explica los métodos de pago (Nequi, Daviplata, Bancolombia o Link de pago).
+
+3. REGLA DE ESCAPE / LISTA DE ESPERA (CRÍTICO):
+   - Si el cliente busca un artículo, material, personalización o especificación que NO se encuentra explícitamente en el catálogo provisto, bajo ninguna circunstancia inventes información.
+   - Debes responder textualmente con un mensaje empático informándole que lo dejarás en una lista de espera y que un asesor humano/personalizado tomará su requerimiento muy pronto. Al final de esta respuesta, debes incluir EXACTAMENTE la etiqueta técnica: [AGENDAR_ASESOR_HUMANO]
+
+4. TONO DE RESPUESTA:
+   - Mantén tus intervenciones dinámicas, directas y cortas, ideales para una lectura rápida en la pantalla de WhatsApp.
 
 CONOCIMIENTO DE INVENTARIO Y PRECIOS:
 - Cadenas: Cadena Maxi Oso Articulado - $28.000 | Cadena Oso Estándar - $28.000 | Maxi Cruz Brillante - $24.000 | Chokers - $15.000 | Gargantilla Lazo - $28.000 | Gargantilla Cubana - $20.000 | Camándula Cristal - $18.000 | Camándula Acero - $25.000 | Nombre Personalizada (Consultar precio).
 - Anillos: Chunky Dorados - $15.000 | Serpiente - $18.000 | 3° Geométrico - $15.000.
 - Tobilleras: Denario San Benito - $18.000 | 7 Nudos - $8.000 | Amuleto San Benito - $20.000.
-- Relicarios: Acero 40cm - $25.000.
-- Aretes: Candongas de Perlas - $25.000 | Set Lisas Doradas - $32.000 | Set Bolitas - $40.000 | Earcuffs - $12.000 a $15.000 | Topos - $18.000 a $27.000 | Hechos a Mano Corazones - $18.000 | Largos Acero - $15.000 | Brillantes Fantasía - $10.000.
+- Aretes: Candongas de Perlas - $25.000 | Candongas Medianas Básicas - $15.000 | Earcuffs - $12.000 a $15.000 | Topos - $12.000 a $27.000 | Orejera Serpiente - $18.000.
 - Joyeros: Cuadrado Pequeño - $25.000 | Redondo - $25.000 | Corazón - $28.000 | Grande con Espejo - $45.000.
-- Pulseras/Brazaletes: Pandora Rodinadas (Consultar) | Pandora Covergold - $50.000 | Love Cartier - $25.000 | Brazaletes Rígidos - $20.000 | Dúo Clavo Cartier - $20.000 | Neopreno Parejas - $25.000 | Parejas con Dijes - $30.000 | Parejas Especiales - $25.000 | Balines Rodio - $12.000.
-
-REGLAS DE INTERACCIÓN:
-1. Si el cliente saluda por primera vez, envía el MENSAJE DE BIENVENIDA exacto.
-2. Si pregunta por una categoría (ej. cadenas), lista los productos de esa categoría con precios y comparte SIEMPRE el link del catálogo: https://wa.me/c/573103632461
-3. Si el cliente dice "quiero comprar" o "quiero llevar", pide: nombre del producto, cantidad, nombre completo, ciudad, dirección y teléfono.
-4. Para el pago indica: transferencia (Bancolombia, Nequi, Daviplata) o link de pago para tarjeta.
-5. Mantén respuestas cortas y directas para WhatsApp.
-
-CUÁNDO TRANSFERIR A UN ASESOR HUMANO:
-Si el cliente pide algo fuera del catálogo, quiere personalizar un producto con su nombre, tiene problemas con un pago, o hace una pregunta muy específica que no puedes responder, responde:
-"Entiendo perfectamente 💖 Para darte la mejor atención con tu solicitud, voy a transferirte con un asesor humano que te atenderá personalmente. En unos momentos te contactará. 🥰"
-NO intentes responder preguntas que no están en tu catálogo. Solo transfiere al asesor.
+- Pulseras/Brazaletes: Pandora Rodinadas (Consultar) | Snake King - $18.000 | Pulseras Multidijes - $23.000 | Neopreno Parejas - $25.000 | Parejas Pequeñas - $25.000.
+- Sets: Juego Cadena y Topos Virgen - $28.000 | Set Trébol Rojo - $35.000 | Set Mariposa - $25.000 | Set Corazón Microcircón - $38.000 | Set Van Cleef Premium - $40.000 | Set Cadena y Topos Oso - $25.000.
 """
 
 @app.route("/webhook", methods=["POST"])
@@ -140,6 +151,11 @@ def webhook():
             temperature=0.6,
         )
         reply_text = chat_completion.choices[0].message.content
+
+        if "[AGENDAR_ASESOR_HUMANO]" in reply_text:
+            print(f"[WEBHOOK] *** SOLICITUD DE ASESOR HUMANO *** De: {from_number}")
+            reply_text = reply_text.replace("[AGENDAR_ASESOR_HUMANO]", "").strip()
+
         reply_text = reply_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         resp.message(reply_text)
         print(f"[WEBHOOK] Respuesta enviada: {reply_text[:80]}...")

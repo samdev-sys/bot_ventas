@@ -5,6 +5,7 @@ import html
 import base64
 import requests
 import tempfile
+import xml.etree.ElementTree as ET
 from datetime import datetime
 import pytz
 from flask import Flask, request, Response

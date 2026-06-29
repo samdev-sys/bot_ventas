@@ -8,7 +8,6 @@ import tempfile
 from datetime import datetime
 import pytz
 from flask import Flask, request
-from twilio.twiml.messaging_response import MessagingResponse
 from groq import Groq
 
 app = Flask(__name__)
@@ -328,58 +327,59 @@ def descargar_y_transcribir_audio(media_url):
         return None
 
 
+def twiml_respuesta(texto):
+    """Construye TwiML manualmente, escapando caracteres XML"""
+    texto = texto.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    texto = texto.replace('"', "&quot;").replace("'", "&apos;")
+    return f'<?xml version="1.0" encoding="UTF-8"?><Response><Message>{texto}</Message></Response>'
+
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    from_number = request.values.get("From", "unknown")
     start = time.time()
-    num_media = int(request.values.get("NumMedia", 0))
-
-    incoming_msg = request.values.get("Body", "").strip()
-    mensaje_original = incoming_msg
-
-    if not verificar_horario_comercial():
-        print("[WEBHOOK] Fuera de horario comercial — recordatorio activado")
-        incoming_msg = f"[RECORDATORIO HORARIO: el horario de atención es Lun-Sáb 2-8:30PM. Domingo cerrado. Responde recordando esto amablemente y luego procede a atender su consulta como siempre.] {incoming_msg}"
-
-    if num_media > 0:
-        media_url = request.values.get("MediaUrl0")
-        media_type = request.values.get("MediaContentType0", "")
-
-        if media_type.startswith("image/"):
-            print(f"[WEBHOOK] Imagen detectada de {from_number} | tipo: {media_type}")
-            descripcion = analizar_imagen(media_url)
-            if descripcion:
-                mensaje_original = descripcion
-                incoming_msg = f"[El cliente envió una imagen. Descripción: {descripcion}]"
-                print(f"[WEBHOOK] Imagen analizada: {descripcion}")
-            else:
-                incoming_msg = "[El cliente envió una imagen que no pudo analizarse]"
-        else:
-            print(f"[WEBHOOK] Audio detectado de {from_number} | tipo: {media_type}")
-            transcripcion = descargar_y_transcribir_audio(media_url)
-            if transcripcion:
-                mensaje_original = transcripcion
-                incoming_msg = f"[Transcripción de audio del cliente: {transcripcion}]"
-                print(f"[WEBHOOK] Mensaje transcrito: {transcripcion}")
-            else:
-                incoming_msg = "[El cliente envió un audio que no pudo transcribirse]"
-    else:
-        print(f"[WEBHOOK] Mensaje de {from_number}: {incoming_msg}")
-
-    resp = MessagingResponse()
-
-    msg_lower = mensaje_original.lower().strip()
-    if any(msg_lower.startswith(s) or msg_lower == s for s in SALUDOS):
-        reply_text = WELCOME_MSG
-        resp.message(reply_text)
-        print(f"[WEBHOOK] Saludo detectado — instrucciones enviadas")
-        elapsed = round(time.time() - start, 2)
-        print(f"[WEBHOOK] Respondido en {elapsed}s")
-        twiml_str = str(resp)
-        print(f"[WEBHOOK] TwiML: {twiml_str}")
-        return twiml_str, 200, {'Content-Type': 'text/xml'}
-
     try:
+        from_number = request.values.get("From", "unknown")
+        num_media = int(request.values.get("NumMedia", 0))
+
+        incoming_msg = request.values.get("Body", "").strip()
+        mensaje_original = incoming_msg
+
+        if not verificar_horario_comercial():
+            print("[WEBHOOK] Fuera de horario comercial — recordatorio activado")
+            incoming_msg = f"[RECORDATORIO HORARIO: el horario de atención es Lun-Sáb 2-8:30PM. Domingo cerrado. Responde recordando esto amablemente y luego procede a atender su consulta como siempre.] {incoming_msg}"
+
+        if num_media > 0:
+            media_url = request.values.get("MediaUrl0")
+            media_type = request.values.get("MediaContentType0", "")
+
+            if media_type.startswith("image/"):
+                print(f"[WEBHOOK] Imagen detectada de {from_number} | tipo: {media_type}")
+                descripcion = analizar_imagen(media_url)
+                if descripcion:
+                    mensaje_original = descripcion
+                    incoming_msg = f"[El cliente envió una imagen. Descripción: {descripcion}]"
+                    print(f"[WEBHOOK] Imagen analizada: {descripcion}")
+                else:
+                    incoming_msg = "[El cliente envió una imagen que no pudo analizarse]"
+            else:
+                print(f"[WEBHOOK] Audio detectado de {from_number} | tipo: {media_type}")
+                transcripcion = descargar_y_transcribir_audio(media_url)
+                if transcripcion:
+                    mensaje_original = transcripcion
+                    incoming_msg = f"[Transcripción de audio del cliente: {transcripcion}]"
+                    print(f"[WEBHOOK] Mensaje transcrito: {transcripcion}")
+                else:
+                    incoming_msg = "[El cliente envió un audio que no pudo transcribirse]"
+        else:
+            print(f"[WEBHOOK] Mensaje de {from_number}: {incoming_msg}")
+
+        msg_lower = mensaje_original.lower().strip()
+        if any(msg_lower.startswith(s) or msg_lower == s for s in SALUDOS):
+            reply_text = WELCOME_MSG
+            elapsed = round(time.time() - start, 2)
+            print(f"[WEBHOOK] Saludo detectado — {elapsed}s")
+            return twiml_respuesta(reply_text), 200, {'Content-Type': 'text/xml'}
+
         historial = obtener_historial(from_number)
         historial.append({"role": "user", "content": incoming_msg})
 
@@ -397,18 +397,14 @@ def webhook():
             print(f"[WEBHOOK] *** SOLICITUD DE ASESOR HUMANO *** De: {from_number}")
             reply_text = reply_text.replace("[AGENDAR_ASESOR_HUMANO]", "").strip()
 
-        resp.message(reply_text)
-        print(f"[WEBHOOK] Respuesta enviada: {reply_text[:80]}...")
+        elapsed = round(time.time() - start, 2)
+        print(f"[WEBHOOK] Respuesta ({elapsed}s): {reply_text[:80]}...")
+        return twiml_respuesta(reply_text), 200, {'Content-Type': 'text/xml'}
 
     except Exception as e:
-        print(f"[WEBHOOK] Error en Groq: {e}")
-        resp.message("¡Hola! ✨ Estamos presentando alta demanda, pero puedes ver fotos y precios de todo nuestro inventario en el catálogo oficial: https://wa.me/c/573103632461 🥰")
-
-    elapsed = round(time.time() - start, 2)
-    print(f"[WEBHOOK] Respondido en {elapsed}s")
-    twiml_str = str(resp)
-    print(f"[WEBHOOK] TwiML: {twiml_str}")
-    return twiml_str, 200, {'Content-Type': 'text/xml'}
+        elapsed = round(time.time() - start, 2)
+        print(f"[WEBHOOK] ERROR ({elapsed}s): {e}")
+        return twiml_respuesta("¡Hola! ✨ Estamos presentando alta demanda. Reintenta en unos segundos o escribe tu mensaje. 🥰"), 200, {'Content-Type': 'text/xml'}
 
 
 @app.route("/ping", methods=["GET"])
@@ -418,18 +414,8 @@ def ping():
 
 @app.route("/webhook-test", methods=["GET", "POST"])
 def webhook_test():
-    """Endpoint para probar que Twilio puede comunicarse"""
-    if request.method == "POST":
-        print(f"[TEST] POST recibido: {request.values}")
-    r = MessagingResponse()
-    r.message("¡Hola! 🛍️ Esto es una prueba del bot de Sofiiaccesorios.")
-    return str(r), 200, {'Content-Type': 'text/xml'}
-
-
-@app.route("/status", methods=["POST"])
-def status():
-    print(f"[STATUS] Status callback: {request.values}")
-    return "OK", 200
+    print(f"[TEST] POST recibido")
+    return twiml_respuesta("¡Hola! 🛍️ Esto es una prueba del bot de Sofiiaccesorios."), 200, {'Content-Type': 'text/xml'}
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

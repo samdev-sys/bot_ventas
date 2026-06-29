@@ -132,7 +132,7 @@ INSTRUCCIONES = """✨ *Cómo hablar conmigo — Tu asistente de Sofiiaccesorios
 
 5️⃣ *¿No encuentras algo?* Te conecto con una asesora humana 💕
 
-✨ Horario: Dom 2-6PM · Lun-Sáb 2-8:30PM"""
+✨ Horario: Lun-Sáb 2-8:30PM"""
 
 WELCOME_MSG = """¡Hola! 🌟 Bienvenidas a Sofiiaccesorios 💖
 
@@ -200,7 +200,6 @@ Por eso, aquí te dejamos los enlaces 🔗 para que puedas consultarlas fácilme
 🙌 Esperamos que esta info te sea súper útil. Si tienes más preguntas, estamos aquí para ayudarte 🤗"""
 
 HORARIO_ATENCION = """Nuestro horario comercial es el siguiente:
-Domingo: 2:00 PM - 6:00 PM
 Lunes a Sábado: 2:00 PM - 8:30 PM"""
 
 MENSAJE_FUERA_HORARIO = """En este momento está cerrado
@@ -211,7 +210,9 @@ Martes: 2:00 PM - 8:30 PM
 Miércoles: 2:00 PM - 8:30 PM
 Jueves: 2:00 PM - 8:30 PM
 Viernes: 2:00 PM - 8:30 PM
-Sábado: 2:00 PM - 8:30 PM"""
+Sábado: 2:00 PM - 8:30 PM
+
+Domingo: Cerrado"""
 
 SYSTEM_PROMPT = """
 Eres "Sofii", la asistente virtual experta en ventas de 'Sofia Vasquez Accesorios'. Tu objetivo es atender con amabilidad, naturalidad, entusiasmo y un tono muy femenino, usando emojis de forma estética (✨, 💖, 🛍️, 🥰).
@@ -252,11 +253,10 @@ def verificar_horario_comercial():
     hora_actual = ahora.time()
 
     if dia_semana == 6:
-        apertura = ahora.replace(hour=14, minute=0, second=0, microsecond=0).time()
-        cierre = ahora.replace(hour=18, minute=0, second=0, microsecond=0).time()
-    else:
-        apertura = ahora.replace(hour=14, minute=0, second=0, microsecond=0).time()
-        cierre = ahora.replace(hour=20, minute=30, second=0, microsecond=0).time()
+        return False
+
+    apertura = ahora.replace(hour=14, minute=0, second=0, microsecond=0).time()
+    cierre = ahora.replace(hour=20, minute=30, second=0, microsecond=0).time()
 
     return apertura <= hora_actual <= cierre
 
@@ -339,7 +339,7 @@ def webhook():
 
     if not verificar_horario_comercial():
         print("[WEBHOOK] Fuera de horario comercial — recordatorio activado")
-        incoming_msg = f"[RECORDATORIO HORARIO: el horario de atención es Dom 2-6PM y Lun-Sáb 2-8:30PM. Responde recordando esto amablemente y luego procede a atender su consulta como siempre.] {incoming_msg}"
+        incoming_msg = f"[RECORDATORIO HORARIO: el horario de atención es Lun-Sáb 2-8:30PM. Domingo cerrado. Responde recordando esto amablemente y luego procede a atender su consulta como siempre.] {incoming_msg}"
 
     if num_media > 0:
         media_url = request.values.get("MediaUrl0")

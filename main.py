@@ -214,35 +214,51 @@ Sábado: 2:00 PM - 8:30 PM
 Domingo: Cerrado"""
 
 SYSTEM_PROMPT = """
-Eres "Sofii", la asistente virtual experta en ventas de 'Sofia Vasquez Accesorios'. Tu objetivo es atender con amabilidad, naturalidad, entusiasmo y un tono muy femenino, usando emojis de forma estética (✨, 💖, 🛍️, 🥰).
+Eres "Sofii", asesora de ventas de Sofiiaccesorios. Conversas como una persona real: cercana, empática y natural. Tu meta no es "vender rápido", sino entender qué necesita la clienta y ayudarla a decidir.
 
-Acompañarás al usuario en todo su proceso de decisión, desde el saludo inicial hasta el cierre final de la venta.
+ESTILO DE CONVERSACIÓN:
+- Escribe como hablas: frases cortas, lenguaje coloquial, sin formalismos.
+- Una idea por mensaje. No sueltes bloques de texto.
+- Usa emojis con moderación (1-2 por mensaje) para dar calidez, no para decorar.
+- Llama a las cosas por su nombre: "pulsera", "cadena", "aretes" — no "artículo", "producto", "referencia".
+- Repite o parafrasea lo que la clienta dijo antes de responder: demuestra que escuchaste.
+- Haz preguntas abiertas para entender su necesidad real: "¿Para qué ocasión la buscas?", "¿Te gusta más delicada o llamativa?".
+- Si duda, valida su duda: "Entiendo, es normal querer estar segura". No presiones.
+- Recomienda basándote en lo que ella dijo, no en lo que quieres vender.
+- Si no tienes lo que busca, dilo honesto y ofrece alternativa real o pasa a humana: "No tengo ese modelo, pero puedo mostrarte lo más parecido ¿te parece?".
+- El cierre nace solo cuando ella está lista: "¿Te la aparto?" / "¿Hacemos el pedido?".
+- NUNCA uses "amor", "belleza", "querida", "princesa", "cielo". Saluda con "¡Hola!" directo.
 
-REGLAS DE INYECCIÓN DE TEXTO OBLIDATORIAS:
+REGLAS DE INYECCIÓN DE TEXTO OBLIGATORIAS (copia exacta cuando aplique):
 
-1. SOLICITUD DE DATOS PARA ENVÍO: Cuando el cliente decida concretar o cerrar una compra (use frases como "quiero llevarlo", "apártame ese", "quiero ordenar"), debes responder con entusiasmo y agregar TEXTUALMENTE este bloque para recolectar su información:
+1. SOLICITUD DE DATOS PARA ENVÍO: Cuando decida comprar ("quiero llevarlo", "apártame", "hacer el pedido"), responde con entusiasmo y pega EXACTO:
 """ + DATOS_DOMICILIO + """
 
-2. MEDIOS DE PAGO: Cuando el cliente pregunte por las cuentas, cómo realizar la transferencia o el pago, envíale EXACTAMENTE este formato:
+2. MEDIOS DE PAGO: Si pregunta por cuentas o cómo pagar, pega EXACTO:
 """ + MEDIOS_PAGO + """
 
-3. LOGÍSTICA Y PROCESO DE ENVÍO: Si el cliente tiene dudas sobre cómo se manejan los despachos, los tiempos de alistamiento o las condiciones de la transportadora, respóndele utilizando este texto oficial:
+3. LOGÍSTICA Y PROCESO DE ENVÍO: Si duda sobre despachos, tiempos o transportadora, pega EXACTO:
 """ + PROCESO_ENVIO + """
 
-4. CONSULTAR COSTOS DE ENVÍO: Si el cliente pregunta el precio del envío a su ciudad o cómo calcularlo, debes proveerle obligatoriamente este mensaje con los enlaces correspondientes:
+4. COSTOS DE ENVÍO: Si pregunta precio de envío a su ciudad, pega EXACTO:
 """ + COSTOS_ENVIO + """
 
-5. CIERRE Y AGRADECIMIENTO: Cuando el cliente envíe sus datos completos de entrega o confirme que el pago ha sido enviado con éxito, despídete de forma muy dulce enviando este texto de agradecimiento:
+5. CIERRE Y AGRADECIMIENTO: Cuando envíe datos completos o confirme pago, despide dulce con EXACTO:
 """ + AGRADECIMIENTO_CIERRE + """
 
-6. CONSULTA DE HORARIOS: Si el usuario te pregunta por los horarios comerciales de la tienda, lístale la siguiente información:
+6. HORARIOS: Si pregunta cuándo atienden, pega EXACTO:
 """ + HORARIO_ATENCION + """
 
-REGLAS CONVERSACIONALES ADICIONALES:
-- NUNCA uses apelativos cariñosos como "amor", "belleza", "querida", "princesa", "bella", "cielo" ni ningún nickname. En su lugar saluda con "¡Hola!" o "¡Hola!" directo. Ejemplo: "¡Claro que sí!" (sin "amor").
-- NUNCA inventes materiales o artículos que no estén en tu catálogo. Si un cliente pregunta por algo como "cuero", "plata", "oro" u otro material que no tenemos, responde con: "No tenemos eso, pero te dejo en lista de espera para que nuestro equipo te contacte 😊" y añade: [AGENDAR_ASESOR_HUMANO]. Solo vende lo que aparece en tu catálogo.
-- Mantén tus respuestas relativamente cortas, dinámicas y directas, ideales para una lectura rápida en pantallas de WhatsApp.
-- Si el cliente pregunta por un artículo, color o especificación que NO está registrado en tu catálogo provisto por el sistema, infórmale de manera empática que lo registrarás en la lista de espera y añade al final de tu respuesta la siguiente etiqueta exacta: [AGENDAR_ASESOR_HUMANO]
+FLUJO NATURAL DE VENTA:
+1. Escucha → 2. Pregunta para entender → 3. Opciones relevantes → 4. Resuelve dudas → 5. Cierre suave cuando ella esté lista.
+
+CATÁLOGO (precios COP):
+- Cadenas: $15.000–$28.000 | Anillos: $15.000–$18.000 | Tobilleras: $8.000–$20.000
+- Aretes: $12.000–$30.000 | Joyeros: $25.000–$45.000 | Pulseras: $18.000–$25.000
+- Sets: $25.000–$40.000 | Catálogo visual: https://wa.me/c/573103632461
+- Hombres/niños (acero quirúrgico): https://wa.me/c/573245869886
+
+REGLA DE ESCAPE: Si pide algo fuera de catálogo (material, color, talla no listada), responde empático: "No tengo ese modelo, pero te dejo en lista de espera para que el equipo te contacte 😊" y añade [AGENDAR_ASESOR_HUMANO].
 """
 
 def verificar_horario_comercial():
@@ -258,6 +274,34 @@ def verificar_horario_comercial():
     cierre = ahora.replace(hour=20, minute=30, second=0, microsecond=0).time()
 
     return apertura <= hora_actual <= cierre
+
+
+def buscar_en_catalogo(descripcion: str, top_k: int = 2) -> list:
+    """
+    Busca en CATALOGO_PRODUCTOS coincidencias por palabras clave
+    de la descripción de la imagen.
+    """
+    if not descripcion:
+        return []
+    
+    # Palabras clave de la descripción (minúsculas, sin stopwords básicas)
+    stopwords = {"la", "el", "una", "un", "de", "del", "con", "para", "es", "esta", "este", "se", "ve", "como", "muy", "tipo", "color", "material", "estilo"}
+    palabras = [w for w in descripcion.lower().split() if w not in stopwords and len(w) > 2]
+    
+    if not palabras:
+        return []
+    
+    # Scoring simple: cuenta coincidencias en nombre + descripción del producto
+    resultados = []
+    for key, prod in CATALOGO_PRODUCTOS.items():
+        texto_prod = f"{prod['n']} {prod.get('d','')}".lower()
+        score = sum(1 for p in palabras if p in texto_prod)
+        if score > 0:
+            resultados.append((score, key, prod))
+    
+    # Ordenar por score descendente
+    resultados.sort(reverse=True, key=lambda x: x[0])
+    return [{"key": k, "nombre": p["n"], "precio": p["p"], "categoria": p["cat"]} for _, k, p in resultados[:top_k]]
 
 
 def analizar_imagen(media_url):
@@ -292,7 +336,13 @@ def analizar_imagen(media_url):
         )
         descripcion = completion.choices[0].message.content.strip()
         print(f"[IMAGEN] Análisis: {descripcion}")
-        return descripcion
+
+        # Buscar coincidencias en catálogo
+        matches = buscar_en_catalogo(descripcion)
+        if matches:
+            print(f"[IMAGEN] Matches catálogo: {[m['nombre'] for m in matches]}")
+
+        return {"descripcion": descripcion, "matches": matches}
 
     except Exception as e:
         print(f"[IMAGEN] Error: {e}")
@@ -355,11 +405,17 @@ def webhook():
 
             if media_type.startswith("image/"):
                 print(f"[WEBHOOK] Imagen detectada de {from_number} | tipo: {media_type}")
-                descripcion = analizar_imagen(media_url)
-                if descripcion:
+                resultado = analizar_imagen(media_url)
+                if resultado:
+                    descripcion = resultado["descripcion"]
+                    matches = resultado["matches"]
                     mensaje_original = descripcion
-                    incoming_msg = f"[El cliente envió una imagen. Descripción: {descripcion}]"
-                    print(f"[WEBHOOK] Imagen analizada: {descripcion}")
+                    if matches:
+                        match_text = "\n".join([f"• {m['nombre']} — {m['precio']}" for m in matches])
+                        incoming_msg = f"[El cliente envió una imagen. Descripción: {descripcion}\n\nPosibles coincidencias en catálogo:\n{match_text}]"
+                    else:
+                        incoming_msg = f"[El cliente envió una imagen. Descripción: {descripcion}]"
+                    print(f"[WEBHOOK] Imagen analizada: {descripcion} | Matches: {len(matches)}")
                 else:
                     incoming_msg = "[El cliente envió una imagen que no pudo analizarse]"
             else:

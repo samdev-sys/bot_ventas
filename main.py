@@ -405,6 +405,7 @@ def webhook():
 
             if media_type.startswith("image/"):
                 print(f"[WEBHOOK] Imagen detectada de {from_number} | tipo: {media_type}")
+                print(f"[WEBHOOK] MediaUrl0: {media_url}")
                 resultado = analizar_imagen(media_url)
                 if resultado:
                     descripcion = resultado["descripcion"]
